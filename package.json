@@ -1,0 +1,14 @@
+{
+  "name": "jdh5st",
+  "version": "1.0.0",
+  "description": "",
+  "main": "h5st.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "private": true,
+  "dependencies": {
+    "crypto-js": "^4.2.0",
+    "md5": "^2.3.0"
+  }
+}
