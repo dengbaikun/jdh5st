@@ -1,7 +1,5 @@
 import hashlib
 import hmac
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import hashes
 
 function_registry = {}
 
@@ -86,18 +84,6 @@ class Digester:
         hmac_hexdigest = hmac_obj.hexdigest()
         return hmac_hexdigest
 
-    @staticmethod
-    @register_function(SM3)
-    def sm3(data_to_hash):
-        # 创建SM3哈希对象
-        digest = hashes.Hash(hashes.SM3(), backend=default_backend())
-
-        # 更新哈希对象以添加数据
-        digest.update(data_to_hash.encode())
-
-        # 计算哈希值
-        hash_value = digest.finalize()
-        return hash_value.hex()
 
 
 if __name__ == '__main__':
