@@ -1,4 +1,4 @@
-function decodeString(encodedString, index) {
+function decodeString(encodedString) {
     const base64Chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/";
     let decodedString = "";
     for (let i = 0, bitGroup = 0, bitCount = 0, currentChar; currentChar = encodedString.charAt(i++);) {
