@@ -3,3 +3,4 @@
 (jd_h5st.py)  python式 主文件入口 
 python version 3.8
 pip install -r requirements.txt
+需求安装nodejs环境 18v-20v npm install crypto-js --save
