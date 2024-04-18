@@ -42,3 +42,5 @@ pip install -r requirements.txt
 https://jdbeantask-pro.pf.jd.com/
 ![在这里插入图片描述](img/jd金豆签到.png)
 验证文件版本是 js_security_v3_0.1.7.js  大家对h5st这个已经成功了逆向了  可以自己实现一下金豆 如果成功基本上没有问题了 有问题可以提出来
+
+增加了_defaultToken.js __genDefaultKey.js 代码跟3.18一样的  请留意js317文件
