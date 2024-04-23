@@ -137,7 +137,7 @@ class Jd(object):
 
 if __name__ == '__main__':
     show = '''
-                                                               ii.                                         ;9ABH,
+                                                           ii.                                         ;9ABH,
                                                           SA391,                                    .r9GG35&G
                                                           &#ii13Gh;                               i3X31i;:,rB1
                                                           iMs,:,i5895,                         .5G91:,:;:s1:8A
