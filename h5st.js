@@ -55,19 +55,18 @@ const env = {
 }
 
 
+const parsedIv = CryptoJS.enc.Utf8.parse(aes_iv);
+const parsedKey = CryptoJS.enc.Utf8.parse(aes_key);
+const envData = CryptoJS.enc.Utf8.parse(JSON.stringify(env, null, 2));
 function collect() {
-
-    let iv = CryptoJS.enc.Utf8.parse(aes_iv), key = CryptoJS.enc.Utf8.parse(aes_key),
-        data = CryptoJS.enc.Utf8.parse(JSON.stringify(env, null, 2));  // data
-    aes = CryptoJS.AES.encrypt(data, key, {
-        iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7
+    const aes = CryptoJS.AES.encrypt(envData, parsedKey, {
+        iv: parsedIv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7
     });
     return aes.ciphertext.toString()//aes.toString()
-
 }
 
 function format() {
-    var e = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : Date.now,
+    var e = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : Date.now(),
         r = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : "yyyy-MM-dd", n = new Date(e), o = r, i = {
             "M+": n.getMonth() + 1,
             "d+": n.getDate(),
@@ -94,13 +93,13 @@ function sha256(text) {
     return CryptoJS.SHA256(text).toString()
 }
 function hmac(algorithm, text, secret) {
-    hmac = crypto.createHmac(algorithm, secret);
+    const mac = crypto.createHmac(algorithm, secret);
 
     // 添加数据
-    hmac.update(text);
+    mac.update(text);
 
     // 生成 HMAC
-    return hmac.digest('hex');
+    return mac.digest('hex');
 }
 function genKey(token, fingerprint, u, appId) {
     var rd = '9oHcP9otd77c';
@@ -109,15 +108,8 @@ function genKey(token, fingerprint, u, appId) {
     return sha256(str);
 }
 function gensign(e, t) {
-    var result = "";
-    for (var i = 0; i < t.length; i++) {
-        result += t[i].key + ":" + t[i].value + "&";
-    }
-    // 删除最后一个多余的&
-    result = result.slice(0, -1);
-    result = e + result + e
-    result = md5(result)
-    return result;
+    const payload = t.map(item => `${item.key}:${item.value}`).join("&");
+    return md5(e + payload + e);
 }
 
 
@@ -143,7 +135,7 @@ const d = {
     t: dt,
     body: r
 }
-const l = JSON.parse(JSON.stringify(d));
+const l = { ...d };
 l.body = sha256(r)
 console.log("l.body",l.body)
 // 先获取对象的所有键，并按字母顺序排序
