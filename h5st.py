@@ -21,7 +21,8 @@ from utils.symmetric_crypto_utils import SymmetricCrypto
 
 class MySubprocessPopen(subprocess.Popen):
     def __init__(self, *args, **kwargs):
-        super().__init__(encoding='UTF-8', *args, **kwargs)
+        kwargs.setdefault('encoding', 'UTF-8')
+        super().__init__(*args, **kwargs)
 
 
 subprocess.Popen = MySubprocessPopen
@@ -46,14 +47,45 @@ def gen_sign(key, t):
 
 
 class H5ST(object):
+    ALGO_CACHE_TTL_SECONDS = 30 * 60
+
     def __init__(self, skuId):
         self.sku_id = skuId
         self.appid = 'fb5df'
         self.version = '4.4'
+        self.file_version = 'h5_file_v4.4.0'
+        self.security_js_version = '0.1.8'
         self.algo = None
         self.fingerPrint = None
         self.token = None
         self.algo_dir_path = './algo/'
+        self.node_signer_path = os.path.join(os.path.dirname(__file__), 'jd_h5st_signer.js')
+
+    @property
+    def algo_cache_file(self):
+        return os.path.join(self.algo_dir_path, f'{self.appid}_{self.version}.algo')
+
+    def clear_algo_cache(self):
+        if os.path.exists(self.algo_cache_file):
+            os.remove(self.algo_cache_file)
+
+    def sign_params(self, params):
+        payload = json.dumps({
+            'appId': self.appid,
+            'params': params,
+            'pageUrl': f'https://item.jd.com/{self.sku_id}.html',
+            'waitMs': 1800
+        }, ensure_ascii=False, separators=(',', ':'))
+        response = subprocess.run(
+            ['node', self.node_signer_path],
+            input=payload,
+            capture_output=True,
+            text=True,
+            check=False
+        )
+        if response.returncode != 0:
+            raise RuntimeError(f"node h5st signer failed: {response.stderr[:1000]}")
+        return json.loads(response.stdout)
 
     def encrypt_env(self):
         aes_iv = '0102030405060708'
@@ -75,9 +107,9 @@ class H5ST(object):
                 "bu5": 0
             },
             "random": generate_random_code(11),
-            "v": "h5_file_v4.4.0",
+            "v": self.file_version,
             "fp": self.fingerPrint,
-            "bu1": "0.1.8"
+            "bu1": self.security_js_version
         }
 
         key = aes_key.encode('utf8')
@@ -106,6 +138,8 @@ class H5ST(object):
         return execjs.compile(nodejs).call("genKey", self.token, self.fingerPrint, u, self.appid)
 
     def gen_h5st(self, l):
+        if os.path.exists(self.node_signer_path):
+            return self.sign_params(l)['h5st']
         if self.load_algo_to_local() is None:
             self.get_algo()
         # 先获取对象的所有键，并按字母顺序排序
@@ -131,7 +165,7 @@ class H5ST(object):
         return h5st
 
     def save_algo_to_local(self, algo):
-        algo_file = '{}{}.algo'.format(self.algo_dir_path, 'algo')
+        algo_file = self.algo_cache_file
         directory = os.path.dirname(algo_file)
         if not os.path.exists(directory):
             os.makedirs(directory)
@@ -139,17 +173,16 @@ class H5ST(object):
             pickle.dump(algo, f)
 
     def load_algo_to_local(self):
-        algo_file = ''
-        if not os.path.exists(self.algo_dir_path):
-            return None
-        for name in os.listdir(self.algo_dir_path):
-            if name.endswith(f".algo"):
-                algo_file = '{}{}'.format(self.algo_dir_path, name)
-                break
-        if algo_file == '':
+        algo_file = self.algo_cache_file
+        if not os.path.exists(algo_file):
             return None
         with open(algo_file, 'rb') as f:
             algo_file = pickle.load(f)
+            if algo_file.get('appid') != self.appid or algo_file.get('version') != self.version:
+                return None
+            fetched_at = algo_file.get('fetched_at', 0)
+            if time.time() - fetched_at > self.ALGO_CACHE_TTL_SECONDS:
+                return None
             self.algo = algo_file['algo']
             self.token = algo_file['token']
             self.fingerPrint = algo_file['fingerPrint']
@@ -217,7 +250,7 @@ class H5ST(object):
             "re": "https://cfe.m.jd.com/",
             "random": generate_random_code(11),
             "referer": "https://cfe.m.jd.com/",
-            "v": "h5_file_v4.4.0",
+            "v": self.file_version,
             "ai": "fb5df",
             "fp": fp
         }
@@ -233,17 +266,28 @@ class H5ST(object):
             "timestamp": int(time.time() * 1000),
             "platform": "web",
             "expandParams": ciphertext,
-            "fv": "h5_file_v4.4.0"
+            "fv": self.file_version
         }
         data = json.dumps(data, separators=(',', ':'))
         response = requests.post(url, headers=headers, params=params, data=data)
+        if response.status_code != 200:
+            raise RuntimeError(f"request_algo failed: status={response.status_code}, body={response.text[:500]}")
         resp_dict = json.loads(response.text)
+        if resp_dict.get('status') not in (200, 0, None) or not resp_dict.get('data'):
+            raise RuntimeError(f"request_algo failed: body={response.text[:500]}")
         result = resp_dict['data']['result']
         token = result['tk']
         algo = result['algo']
         fingerPrint = result['fp']
         print(f'token={token}\nalgo={algo}\nfingerPrint={fingerPrint}')
-        algo_file = {'token': token, 'algo': algo, 'fingerPrint': fingerPrint}
+        algo_file = {
+            'appid': self.appid,
+            'version': self.version,
+            'fetched_at': time.time(),
+            'token': token,
+            'algo': algo,
+            'fingerPrint': fingerPrint
+        }
         self.algo = algo
         self.token = token
         self.fingerPrint = fingerPrint

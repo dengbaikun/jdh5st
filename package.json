@@ -9,6 +9,8 @@
   "private": true,
   "dependencies": {
     "crypto-js": "^4.2.0",
-    "md5": "^2.3.0"
+    "md5": "^2.3.0",
+    "puppeteer-core": "^19.11.1",
+    "xhr2": "^0.2.1"
   }
 }

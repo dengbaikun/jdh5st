@@ -20,7 +20,8 @@ from utils.timer import Timer
 
 class MySubprocessPopen(subprocess.Popen):
     def __init__(self, *args, **kwargs):
-        super().__init__(encoding='UTF-8', *args, **kwargs)
+        kwargs.setdefault('encoding', 'UTF-8')
+        super().__init__(*args, **kwargs)
 
 
 subprocess.Popen = MySubprocessPopen
@@ -31,28 +32,54 @@ class Jd(object):
         self.sku_id = 100071422470
         self.page_config_dir_path = './page_config/'
         self.headers = {
-            "authority": "api.m.jd.com",
-            "accept": "application/json, text/javascript, */*; q=0.01",
-            "accept-language": "zh-CN,zh;q=0.9",
+            "accept": "application/json, text/plain, */*",
+            "accept-language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6",
+            "content-type": "application/x-www-form-urlencoded",
             "origin": "https://item.jd.com",
-            "referer": "https://item.jd.com/100071422470.html",
-            "sec-ch-ua": "\"Chromium\";v=\"122\", \"Not(A:Brand\";v=\"24\", \"Google Chrome\";v=\"122\"",
+            "priority": "u=1, i",
+            "referer": "https://item.jd.com/",
+            "sec-ch-ua": "\"Not;A=Brand\";v=\"99\", \"Microsoft Edge\";v=\"139\", \"Chromium\";v=\"139\"",
             "sec-ch-ua-mobile": "?0",
             "sec-ch-ua-platform": "\"Windows\"",
             "sec-fetch-dest": "empty",
             "sec-fetch-mode": "cors",
             "sec-fetch-site": "same-site",
-            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-            "x-referer-page": "https://item.jd.com/10096186210939.html",
-            "x-rp-client": "h5_1.0.0"
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 Edg/139.0.0.0",
+            "x-referer-page": f"https://item.jd.com/{self.sku_id}.html",
+            "x-rp-client": "h5_2.2.0"
         }
         self.cookies = {
-            "__jdu": "166875052289262543994",
-            "shshshfpa": "b679439f-c6b7-12a0-4ea4-fc91a6b9d991-1656387789",
-            "shshshfpx": "b679439f-c6b7-12a0-4ea4-fc91a6b9d991-1656387789",
-            "TrackID": "14PF-dEiQugVUN_eiTWYCAVQBLDPhOhuDiYRkG6F5BfeN2ZMxTXfOVZnYRuKXNqqquavtQcGzeOeNr5IS2h3yafBoO_P42HzY3v8q-ewLj9w",
-            "thor": "8F5208C9AC0E50DD03ADBF4B4BC693F7611F10288F3B374DEFC49B3F5295D77E16C113850F074D83C335412C0B13FD03983D9B43D1C6BC5833318B71E39EE7E94DBF6263DCD8672DBA49697CEF10A765900894C05EF4551A244753B30ED0C80B0C8E5412295485DE58869E70B1CFC8E4ECBE94FEEB98D8EFEA4EE0928C2D68BC8213658AC444E2BEC5252ACEFB88F6E69C33B8B0C49FC9341425CBD833F971D7",
-        }
+        "__jdv": "122270672%7Cdirect%7C-%7Cnone%7C-%7C1779787739916",
+        "mba_muid": "17797877399161687594981",
+        "__jdu": "17797877399161687594981",
+        "3AB9D23F7A4B3CSS": "jdd03QUZ7OUOAYKI7QQEVOPIOVFIXFPPT2J4CDGYOKROZ4BW7JGAZVE2R444CHVNCPGCAIZWHGCFY6U7E2SYL5O2ZVFTVRUAAAAM6MO22RAAAAAAADOUQSPLLP2UXWUX",
+        "_gia_d": "1",
+        "areaId": "19",
+        "ipLoc-djd": "19-1666-0-0",
+        "mba_sid": "1779787739917512077496.3",
+        "wlfstk_smdl": "bb3pnlvsxanrmqkjx6iwclc4e73q9lcl",
+        "3AB9D23F7A4B3C9B": "QUZ7OUOAYKI7QQEVOPIOVFIXFPPT2J4CDGYOKROZ4BW7JGAZVE2R444CHVNCPGCAIZWHGCFY6U7E2SYL5O2ZVFTVRU",
+        "TrackID": "1B5i2AGF3C2bfwq8wYxBQW2hiRGhP300sGnkrmWyEGfpNftqLITfWyMjgymfCY8OEpcDvqSG0oWnZMgXDYy8I1NX-jK7ZX9-zYMXaebzGbXLIaa7tSVPDXbSPU2qB_LGw",
+        "thor": "8F5208C9AC0E50DD03ADBF4B4BC693F7611F10288F3B374DEFC49B3F5295D77EF796AB3AE74D178983CB6AFBD136498285FCD820FCA72EE77135E9EFFD0FEC9C3A9EE85946CF4390302C88D445D989C193E8C791EE6C1CDFE4F94C0BF314D8DF1FBB795B73B1F81F1E30435F0083D02BE3BB373BDEE64E134258EC1C0B8DA8FD47C9B7CEEE4FE20F3CD7F4E3CF77DB6FD8C8F430A57F93038C809F17C40886C7",
+        "flash": "3_4UhiZWxIfY3lHqZg0VnD2oWvzdeBpjXQJB_BWLBdniyr5TdRfv_Up6OWl-ihtjQsnsY_ZgHgR-E0IyICQn9QgLa5k_Xzp-8ZUmABH1nHSjiIkGcuJLOLpz3k0oI0DrRxCaAeQabOft2CgOaxGSBT70CF1Y-vY20MkHaq8wOoLYxb5BlUsAMwLV**",
+        "light_key": "AASBKE7rOxgWQziEhC_QY6yacE67_EmlNYs4g-udV6lST7ArLpiUyvTcVyOkGnT_rg1s6dSC",
+        "pinId": "iUhfo8tVoA0orkmEvSwKULV9-x-f3wj7",
+        "pin": "jd_4536d74677e8d",
+        "unick": "jd_132884ger",
+        "ceshi3.com": "201",
+        "_tp": "cuf1PxPHod0x5ppVA3nVM9web9%2FU6cZkZBtOlsaQ6to%3D",
+        "_pst": "jd_4536d74677e8d",
+        "token": "c7f0b39c7a75d65f167f764fc9446c13,3,988771",
+        "__jda": "181111935.17797877399161687594981.1779787739.1779787739.1779787739.1",
+        "__jdc": "181111935",
+        "cn": "21",
+        "shshshfpa": "6a8a53ed-588e-93cb-dae0-dc4f575821a5-1779789339",
+        "shshshfpx": "6a8a53ed-588e-93cb-dae0-dc4f575821a5-1779789339",
+        "shshshfpb": "BApXWvLS-YPtAfP39qsl9f2gptTjsnpB_Bjs5lBZo9xJ1ItZfQtKDwUzv23-sZNF2K7EluNSNsqFbdOk0v64Nt48vMV_jqTWVa99h",
+        "RT": "\"z=1&dm=jd.com&si=wx499ie8x8j&ss=mpmglnvc&sl=3&tt=0&obo=3\"",
+        "__jdb": "181111935.17.17797877399161687594981|1.1779787739",
+        "sdtoken": "AAbEsBpEIOVjqTAKCQtvQu17DQqoeLpqs6gENlT6pqqsukjeocBElw0EHcIM2--z0ue-vyXp0WXt3hsYrzL4IOtBnvxeE40ChaA9xTCfUsJF9aGumYGoHzDJIkb-idtSFuOjVnde"
+    }
         self.session = requests.Session()
         # 设置重试次数 设置线程池
         self.timeout = 5
@@ -113,22 +140,27 @@ class Jd(object):
             'bbTraffic': '',
             'canvasType': 1
         }
+        h5st = H5ST(self.sku_id)
         params = {
+            "uuid": "17797877399161687594981",
             'appid': "pc-item-soa",
             'functionId': "pc_detailpage_wareBusiness",
             'client': "pc",
+            "uuid": "17797877399161687594981",
             'clientVersion': "1.0.0",
             't': int(time.time() * 1000),
             'body': json.dumps(body, separators=(',', ':')),
+            "x-api-eid-token": "jdd03QUZ7OUOAYKI7QQEVOPIOVFIXFPPT2J4CDGYOKROZ4BW7JGAZVE2R444CHVNCPGCAIZWHGCFY6U7E2SYL5O2ZVFTVRUAAAAM6MO22RAAAAAAADOUQSPLLP2UXWUX"
         }
-        sha256_body = Digester.sha256(params['body'])
-        d = copy.deepcopy(params)
-        d['body'] = sha256_body
-        h5st = H5ST(self.sku_id)
-        h5st = h5st.gen_h5st(d)
-        params['h5st'] = h5st
-        params['loginType'] = '3'
-        params['scval'] = '100011293139'
+        # params['scval'] = '100011293139'
+        signed_params = h5st.sign_params(copy.deepcopy(params))
+        for cookie in signed_params.get('__cookies', []):
+            self.session.cookies.set(cookie['name'], cookie['value'], domain=cookie.get('domain'))
+        params.update({
+            # '_stk': signed_params['_stk'],
+            # '_ste': signed_params['_ste'],
+            'h5st': signed_params['h5st']
+        })
         url = "https://api.m.jd.com/"
         response = self.session.get(url, headers=self.headers, cookies=self.cookies, params=params)
         print(response.text)
