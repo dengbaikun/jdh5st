@@ -12,6 +12,7 @@ import requests
 from Crypto.Cipher import AES
 
 from utils.codec_utils import HEX
+from utils import config
 from utils.digester_utils import Digester
 from datetime import datetime
 from datetime import timezone, timedelta
@@ -51,7 +52,7 @@ class H5ST(object):
 
     def __init__(self, skuId):
         self.sku_id = skuId
-        self.appid = 'fb5df'
+        self.appid = config.H5ST_APP_ID
         self.version = '4.4'
         self.file_version = 'h5_file_v4.4.0'
         self.security_js_version = '0.1.8'
@@ -74,7 +75,10 @@ class H5ST(object):
             'appId': self.appid,
             'params': params,
             'pageUrl': f'https://item.jd.com/{self.sku_id}.html',
-            'waitMs': 1800
+            'waitMs': config.SIGN_WAIT_MS,
+            'chromePath': config.CHROME_PATH,
+            'userAgent': config.USER_AGENT,
+            'preferMock': config.PREFER_MOCK_SIGNER
         }, ensure_ascii=False, separators=(',', ':'))
         response = subprocess.run(
             ['node', self.node_signer_path],
@@ -293,5 +297,4 @@ class H5ST(object):
         self.fingerPrint = fingerPrint
         self.save_algo_to_local(algo_file)
         return fingerPrint, token, algo
-
 
